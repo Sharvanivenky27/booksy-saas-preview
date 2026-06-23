@@ -1,0 +1,150 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  LayoutDashboard,
+  CalendarDays,
+  Users,
+  Scissors,
+  UserCog,
+  MapPin,
+  Settings,
+  BookOpen,
+  LogOut,
+  ChevronRight,
+  X,
+} from "lucide-react";
+import { cn } from "@/lib/cn";
+import { useSidebar } from "./SidebarContext";
+
+const NAV_ITEMS = [
+  { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/bookings", icon: BookOpen, label: "Bookings" },
+  { href: "/calendar", icon: CalendarDays, label: "Calendar" },
+  { href: "/customers", icon: Users, label: "Customers" },
+  { href: "/services", icon: Scissors, label: "Services" },
+  { href: "/staff", icon: UserCog, label: "Staff" },
+  { href: "/locations", icon: MapPin, label: "Locations" },
+  { href: "/settings", icon: Settings, label: "Settings" },
+];
+
+const PLACEHOLDER_ITEMS = [
+  { label: "Payments", coming: true },
+  { label: "AI Receptionist", coming: true },
+  { label: "Inventory", coming: true },
+  { label: "Marketing", coming: true },
+  { label: "Loyalty", coming: true },
+];
+
+interface SidebarProps {
+  businessName?: string;
+  userName?: string;
+}
+
+export function Sidebar({ businessName = "My Business", userName = "Owner" }: SidebarProps) {
+  const pathname = usePathname();
+  const { mobileOpen, closeMobile } = useSidebar();
+
+  async function handleLogout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/login";
+  }
+
+  return (
+    <>
+      {/* Mobile backdrop */}
+      {mobileOpen && (
+        <div
+          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          onClick={closeMobile}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 z-50 w-64 min-h-screen bg-brand-950 text-white flex flex-col transition-transform duration-200 ease-in-out",
+          "lg:static lg:z-auto lg:w-60 lg:translate-x-0",
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        )}
+      >
+        {/* Logo */}
+        <div className="px-4 py-5 border-b border-white/10 flex items-center justify-between">
+          <div className="min-w-0">
+            <span className="text-xl font-bold text-white">BookEase</span>
+            <p className="text-xs text-brand-300 mt-0.5 truncate">{businessName}</p>
+          </div>
+          <button
+            onClick={closeMobile}
+            className="lg:hidden text-brand-400 hover:text-white p-1 -mr-1"
+            aria-label="Close menu"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        {/* Nav */}
+        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
+          {NAV_ITEMS.map((item) => {
+            const active =
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={closeMobile}
+                className={cn(
+                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  active
+                    ? "bg-brand-700 text-white"
+                    : "text-brand-300 hover:bg-white/10 hover:text-white"
+                )}
+              >
+                <item.icon className="h-4 w-4 flex-shrink-0" />
+                {item.label}
+                {active && <ChevronRight className="h-3 w-3 ml-auto opacity-60" />}
+              </Link>
+            );
+          })}
+
+        {/* Placeholders */}
+        <div className="pt-4 pb-1 px-3">
+          <p className="text-[10px] uppercase tracking-widest text-brand-500 font-semibold">
+            Coming Soon
+          </p>
+        </div>
+        {PLACEHOLDER_ITEMS.map((item) => (
+          <div
+            key={item.label}
+            className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm text-brand-600 cursor-default select-none"
+          >
+            <span className="h-4 w-4 rounded bg-brand-800 flex-shrink-0" />
+            {item.label}
+          </div>
+        ))}
+      </nav>
+
+      {/* User footer */}
+      <div className="px-4 py-3 border-t border-white/10 flex items-center gap-2">
+        <div className="h-8 w-8 rounded-full bg-brand-600 flex items-center justify-center text-xs font-bold flex-shrink-0">
+          {userName.charAt(0).toUpperCase()}
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-white truncate">{userName}</p>
+          <p className="text-xs text-brand-400">Owner</p>
+        </div>
+        <button
+          onClick={handleLogout}
+          className="text-brand-400 hover:text-white transition-colors"
+          title="Sign out"
+        >
+          <LogOut className="h-4 w-4" />
+        </button>
+      </div>
+      </aside>
+    </>
+  );
+}
