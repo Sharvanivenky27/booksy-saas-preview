@@ -5,6 +5,9 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"]
     },
+    "@booksy/db#build": {
+      "outputs": []
+    },
     "dev": {
       "cache": false,
       "persistent": true

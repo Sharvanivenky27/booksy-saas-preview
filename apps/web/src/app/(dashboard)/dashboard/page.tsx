@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import type { Prisma } from "@booksy/db";
 import { TopBar } from "@/components/layout/TopBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +14,14 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { format } from "date-fns";
+
+type UpcomingAppointment = Prisma.AppointmentGetPayload<{
+  include: {
+    customer: { select: { name: true } };
+    service: { select: { name: true; duration: true } };
+    staff: { include: { user: { select: { name: true } } } };
+  };
+}>;
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, "default" | "success" | "warning" | "destructive" | "secondary"> = {
@@ -140,7 +149,7 @@ export default async function DashboardPage() {
               />
             ) : (
               <div className="space-y-2">
-                {upcomingAppointments.map((appt) => (
+                {upcomingAppointments.map((appt: UpcomingAppointment) => (
                   <div
                     key={appt.id}
                     className="flex flex-wrap items-center gap-3 sm:gap-4 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
