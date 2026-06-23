@@ -45,7 +45,7 @@ export default async function BookingsPage() {
         appointments={JSON.parse(JSON.stringify(appointments))}
         customers={customers}
         services={JSON.parse(JSON.stringify(services))}
-        staff={staff.map((s) => ({ id: s.id, name: s.user.name }))}
+        staff={staff.map((s: (typeof staff)[number]) => ({ id: s.id, name: s.user.name }))}
       />
     </>
   );
