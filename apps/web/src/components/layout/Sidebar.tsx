@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -21,20 +22,22 @@ import { useSidebar } from "./SidebarContext";
 const NAV_ITEMS = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/bookings", icon: BookOpen, label: "Bookings" },
-  { href: "/calendar", icon: CalendarDays, label: "Calendar" },
   { href: "/customers", icon: Users, label: "Customers" },
   { href: "/services", icon: Scissors, label: "Services" },
   { href: "/staff", icon: UserCog, label: "Staff" },
   { href: "/locations", icon: MapPin, label: "Locations" },
-  { href: "/settings", icon: Settings, label: "Settings" },
 ];
 
+// Not yet built. Listed (rather than linked) so the sidebar never
+// points at a route that 404s/renders blank.
 const PLACEHOLDER_ITEMS = [
-  { label: "Payments", coming: true },
-  { label: "AI Receptionist", coming: true },
-  { label: "Inventory", coming: true },
-  { label: "Marketing", coming: true },
-  { label: "Loyalty", coming: true },
+  { label: "Calendar", icon: CalendarDays },
+  { label: "Settings", icon: Settings },
+  { label: "Payments" },
+  { label: "AI Receptionist" },
+  { label: "Inventory" },
+  { label: "Marketing" },
+  { label: "Loyalty" },
 ];
 
 interface SidebarProps {
@@ -45,11 +48,52 @@ interface SidebarProps {
 export function Sidebar({ businessName = "My Business", userName = "Owner" }: SidebarProps) {
   const pathname = usePathname();
   const { mobileOpen, closeMobile } = useSidebar();
+  const asideRef = useRef<HTMLElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/login";
   }
+
+  // Mobile drawer: trap focus, close on Escape, and lock body scroll while open.
+  // Only engages below the lg breakpoint, where the drawer behaves like an overlay.
+  useEffect(() => {
+    if (!mobileOpen || typeof window === "undefined" || window.innerWidth >= 1024) return;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    closeButtonRef.current?.focus();
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        closeMobile();
+        return;
+      }
+      if (e.key !== "Tab" || !asideRef.current) return;
+
+      const focusable = asideRef.current.querySelectorAll<HTMLElement>(
+        'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [mobileOpen, closeMobile]);
 
   return (
     <>
@@ -63,6 +107,10 @@ export function Sidebar({ businessName = "My Business", userName = "Owner" }: Si
       )}
 
       <aside
+        ref={asideRef}
+        role="navigation"
+        aria-label="Main"
+        aria-modal={mobileOpen ? "true" : undefined}
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 min-h-screen bg-brand-950 text-white flex flex-col transition-transform duration-200 ease-in-out",
           "lg:static lg:z-auto lg:w-60 lg:translate-x-0",
@@ -76,8 +124,9 @@ export function Sidebar({ businessName = "My Business", userName = "Owner" }: Si
             <p className="text-xs text-brand-300 mt-0.5 truncate">{businessName}</p>
           </div>
           <button
+            ref={closeButtonRef}
             onClick={closeMobile}
-            className="lg:hidden text-brand-400 hover:text-white p-1 -mr-1"
+            className="lg:hidden text-brand-400 hover:text-white p-1 -mr-1 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
             aria-label="Close menu"
           >
             <X className="h-5 w-5" />
@@ -96,8 +145,10 @@ export function Sidebar({ businessName = "My Business", userName = "Owner" }: Si
                 key={item.href}
                 href={item.href}
                 onClick={closeMobile}
+                aria-current={active ? "page" : undefined}
                 className={cn(
                   "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
                   active
                     ? "bg-brand-700 text-white"
                     : "text-brand-300 hover:bg-white/10 hover:text-white"
@@ -119,10 +170,18 @@ export function Sidebar({ businessName = "My Business", userName = "Owner" }: Si
         {PLACEHOLDER_ITEMS.map((item) => (
           <div
             key={item.label}
+            aria-disabled="true"
             className="flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-sm text-brand-600 cursor-default select-none"
           >
-            <span className="h-4 w-4 rounded bg-brand-800 flex-shrink-0" />
-            {item.label}
+            {item.icon ? (
+              <item.icon className="h-4 w-4 flex-shrink-0" />
+            ) : (
+              <span className="h-4 w-4 rounded bg-brand-800 flex-shrink-0" />
+            )}
+            <span className="flex-1 truncate">{item.label}</span>
+            <span className="text-[10px] uppercase tracking-wide text-brand-700 flex-shrink-0">
+              Soon
+            </span>
           </div>
         ))}
       </nav>
@@ -138,7 +197,8 @@ export function Sidebar({ businessName = "My Business", userName = "Owner" }: Si
         </div>
         <button
           onClick={handleLogout}
-          className="text-brand-400 hover:text-white transition-colors"
+          className="text-brand-400 hover:text-white transition-colors rounded p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+          aria-label="Sign out"
           title="Sign out"
         >
           <LogOut className="h-4 w-4" />

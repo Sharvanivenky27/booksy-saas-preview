@@ -14,6 +14,7 @@ export default async function ServicesPage() {
       id: true,
       name: true,
       category: true,
+      description: true,
       duration: true,
       price: true,
       currency: true,

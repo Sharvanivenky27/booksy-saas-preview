@@ -6,12 +6,16 @@ import { TopBar } from "@/components/layout/TopBar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/empty-state";
+import Link from "next/link";
 import {
   CalendarDays,
   Users,
   Scissors,
   Clock,
   TrendingUp,
+  CheckCircle2,
+  Circle,
+  ArrowRight,
 } from "lucide-react";
 import { format } from "date-fns";
 
@@ -48,6 +52,7 @@ export default async function DashboardPage() {
     totalCustomers,
     totalServices,
     totalStaff,
+    totalLocations,
     upcomingAppointments,
   ] = await Promise.all([
     prisma.appointment.count({
@@ -60,6 +65,7 @@ export default async function DashboardPage() {
     prisma.customer.count({ where: { businessId, isActive: true } }),
     prisma.service.count({ where: { businessId, isActive: true } }),
     prisma.staff.count({ where: { businessId, isActive: true } }),
+    prisma.location.count({ where: { businessId, isActive: true } }),
     prisma.appointment.findMany({
       where: {
         businessId,
@@ -107,6 +113,13 @@ export default async function DashboardPage() {
     },
   ];
 
+  const setupSteps = [
+    { label: "Add a location", href: "/locations", done: totalLocations > 0 },
+    { label: "Add a service", href: "/services", done: totalServices > 0 },
+    { label: "Add a staff member", href: "/staff", done: totalStaff > 0 },
+  ];
+  const isSetupIncomplete = setupSteps.some((step) => !step.done);
+
   return (
     <>
       <TopBar
@@ -114,6 +127,43 @@ export default async function DashboardPage() {
         subtitle={`Welcome back, ${session.name}`}
       />
       <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        {/* Getting started checklist */}
+        {isSetupIncomplete && (
+          <Card className="mb-6 border-brand-100 bg-brand-50/40">
+            <CardHeader>
+              <CardTitle>Finish setting up your business</CardTitle>
+              <p className="text-sm text-gray-500">
+                Complete these steps so customers can start booking with you.
+              </p>
+            </CardHeader>
+            <CardContent className="space-y-2">
+              {setupSteps.map((step) => (
+                <Link
+                  key={step.href}
+                  href={step.href}
+                  className="flex items-center gap-3 rounded-lg p-2.5 -mx-2.5 hover:bg-white transition-colors group"
+                >
+                  {step.done ? (
+                    <CheckCircle2 className="h-5 w-5 text-emerald-600 flex-shrink-0" />
+                  ) : (
+                    <Circle className="h-5 w-5 text-gray-300 flex-shrink-0" />
+                  )}
+                  <span
+                    className={`flex-1 text-sm font-medium ${
+                      step.done ? "text-gray-400 line-through" : "text-gray-900"
+                    }`}
+                  >
+                    {step.label}
+                  </span>
+                  {!step.done && (
+                    <ArrowRight className="h-4 w-4 text-brand-600 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0" />
+                  )}
+                </Link>
+              ))}
+            </CardContent>
+          </Card>
+        )}
+
         {/* Metrics */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {metrics.map((m) => (

@@ -18,6 +18,7 @@ export default async function LocationsPage() {
       province: true,
       postalCode: true,
       phone: true,
+      email: true,
     },
     orderBy: { name: "asc" },
   });

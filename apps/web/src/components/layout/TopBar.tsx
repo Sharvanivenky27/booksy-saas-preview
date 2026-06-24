@@ -16,7 +16,7 @@ export function TopBar({ title, subtitle, actions }: TopBarProps) {
     <header className="h-16 border-b border-gray-100 bg-white flex items-center px-4 sm:px-6 lg:px-8 gap-3 flex-shrink-0 sticky top-0 z-30">
       <button
         onClick={openMobile}
-        className="lg:hidden -ml-1 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg flex-shrink-0"
+        className="lg:hidden -ml-1 p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
         aria-label="Open menu"
       >
         <Menu className="h-5 w-5" />
@@ -29,7 +29,12 @@ export function TopBar({ title, subtitle, actions }: TopBarProps) {
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
         {actions}
-        <button className="relative p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100">
+        <button
+          disabled
+          aria-label="Notifications (coming soon)"
+          title="Notifications (coming soon)"
+          className="relative p-2 text-gray-300 rounded-lg cursor-not-allowed disabled:opacity-100"
+        >
           <Bell className="h-4 w-4" />
         </button>
       </div>

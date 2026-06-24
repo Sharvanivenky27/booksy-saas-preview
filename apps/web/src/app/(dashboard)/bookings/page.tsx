@@ -10,7 +10,7 @@ export default async function BookingsPage() {
 
   const businessId = session.businessId;
 
-  const [appointments, customers, services, staff] = await Promise.all([
+  const [appointments, customers, services, staff, locations] = await Promise.all([
     prisma.appointment.findMany({
       where: { businessId },
       include: {
@@ -36,6 +36,11 @@ export default async function BookingsPage() {
       where: { businessId, isActive: true },
       include: { user: { select: { id: true, name: true } } },
     }),
+    prisma.location.findMany({
+      where: { businessId, isActive: true },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
   ]);
 
   return (
@@ -46,6 +51,7 @@ export default async function BookingsPage() {
         customers={customers}
         services={JSON.parse(JSON.stringify(services))}
         staff={staff.map((s: (typeof staff)[number]) => ({ id: s.id, name: s.user.name }))}
+        locations={locations}
       />
     </>
   );

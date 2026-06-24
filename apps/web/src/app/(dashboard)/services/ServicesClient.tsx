@@ -1,31 +1,19 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Plus, Scissors, Search } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
-
-interface Service {
-  id: string;
-  name: string;
-  category: string | null;
-  duration: number;
-  price: number | string;
-  currency: string;
-  isActive: boolean;
-}
+import { EmptyState } from "@/components/ui/empty-state";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { ServiceFormDialog, type ServiceRecord } from "@/components/forms/ServiceFormDialog";
+import { toast } from "@/hooks/use-toast";
 
 interface ServicesClientProps {
-  services: Service[];
+  services: ServiceRecord[];
 }
 
 function formatPrice(price: number | string, currency: string) {
@@ -37,9 +25,12 @@ function formatPrice(price: number | string, currency: string) {
 }
 
 export function ServicesClient({ services }: ServicesClientProps) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [createOpen, setCreateOpen] = useState(false);
-  const [editTarget, setEditTarget] = useState<Service | null>(null);
+  const [editTarget, setEditTarget] = useState<ServiceRecord | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<ServiceRecord | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -50,6 +41,42 @@ export function ServicesClient({ services }: ServicesClientProps) {
         s.category?.toLowerCase().includes(q)
     );
   }, [services, query]);
+
+  async function handleDelete() {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/services/${deleteTarget.id}`, { method: "DELETE" });
+      if (!res.ok) {
+        toast({ variant: "destructive", title: "Couldn't delete service" });
+        return;
+      }
+      toast({ variant: "success", title: "Service deleted" });
+      setDeleteTarget(null);
+      router.refresh();
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  if (services.length === 0) {
+    return (
+      <div className="p-6">
+        <EmptyState
+          icon={Scissors}
+          title="No services yet"
+          description="Add your first service so customers and staff have something to book."
+          action={
+            <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="h-4 w-4" />
+              Add Service
+            </Button>
+          }
+        />
+        <ServiceFormDialog open={createOpen} onOpenChange={setCreateOpen} />
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-4">
@@ -70,70 +97,76 @@ export function ServicesClient({ services }: ServicesClientProps) {
       </div>
 
       <Card className="overflow-hidden">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 text-gray-500 text-left">
-            <tr>
-              <th className="px-4 py-3 font-medium">Name</th>
-              <th className="px-4 py-3 font-medium">Category</th>
-              <th className="px-4 py-3 font-medium">Price</th>
-              <th className="px-4 py-3 font-medium">Duration</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100">
-            {filtered.length === 0 && (
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px] text-sm">
+            <thead className="bg-gray-50 text-gray-500 text-left">
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                  No services found.
-                </td>
+                <th className="px-4 py-3 font-medium">Name</th>
+                <th className="px-4 py-3 font-medium">Category</th>
+                <th className="px-4 py-3 font-medium">Price</th>
+                <th className="px-4 py-3 font-medium">Duration</th>
+                <th className="px-4 py-3 font-medium">Status</th>
+                <th className="px-4 py-3 font-medium text-right">Actions</th>
               </tr>
-            )}
-            {filtered.map((service) => (
-              <tr key={service.id}>
-                <td className="px-4 py-3 text-gray-900">{service.name}</td>
-                <td className="px-4 py-3 text-gray-700">{service.category ?? "—"}</td>
-                <td className="px-4 py-3 text-gray-700">
-                  {formatPrice(service.price, service.currency)}
-                </td>
-                <td className="px-4 py-3 text-gray-700">{service.duration} min</td>
-                <td className="px-4 py-3">
-                  <Badge variant={service.isActive ? "success" : "secondary"}>
-                    {service.isActive ? "Active" : "Inactive"}
-                  </Badge>
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Button variant="ghost" size="sm" onClick={() => setEditTarget(service)}>
-                    Edit
-                  </Button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                    No services match &quot;{query}&quot;.
+                  </td>
+                </tr>
+              )}
+              {filtered.map((service) => (
+                <tr key={service.id}>
+                  <td className="px-4 py-3 text-gray-900">{service.name}</td>
+                  <td className="px-4 py-3 text-gray-700">{service.category ?? "—"}</td>
+                  <td className="px-4 py-3 text-gray-700">
+                    {formatPrice(service.price, service.currency)}
+                  </td>
+                  <td className="px-4 py-3 text-gray-700">{service.duration} min</td>
+                  <td className="px-4 py-3">
+                    <Badge variant={service.isActive ? "success" : "secondary"}>
+                      {service.isActive ? "Active" : "Inactive"}
+                    </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => setEditTarget(service)}>
+                        Edit
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-600 hover:bg-red-50"
+                        onClick={() => setDeleteTarget(service)}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </Card>
 
-      <Dialog open={createOpen} onOpenChange={setCreateOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>New Service</DialogTitle>
-            <DialogDescription>
-              Service creation form is coming soon.
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={editTarget !== null} onOpenChange={(open) => !open && setEditTarget(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Service</DialogTitle>
-            <DialogDescription>
-              Editing {editTarget?.name} is coming soon.
-            </DialogDescription>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+      <ServiceFormDialog open={createOpen} onOpenChange={setCreateOpen} />
+      <ServiceFormDialog
+        open={editTarget !== null}
+        onOpenChange={(open) => !open && setEditTarget(null)}
+        service={editTarget}
+      />
+      <ConfirmDialog
+        open={deleteTarget !== null}
+        onOpenChange={(open) => !open && setDeleteTarget(null)}
+        title="Delete service?"
+        description={`This will mark "${deleteTarget?.name}" as inactive. It will no longer be bookable.`}
+        confirmLabel="Delete"
+        loading={deleting}
+        onConfirm={handleDelete}
+      />
     </div>
   );
 }
