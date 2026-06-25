@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (!user || !(await verifyPassword(password, user.password))) {
+    if (!user || !user.password || !(await verifyPassword(password, user.password))) {
       return NextResponse.json(
         { error: "Invalid email or password" },
         { status: 401 }
@@ -61,7 +61,11 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error("Login error:", err);
+    console.error("Login error", {
+      name: err instanceof Error ? err.name : typeof err,
+      message: err instanceof Error ? err.message : String(err),
+      stack: err instanceof Error ? err.stack?.split("\n").slice(0, 5) : undefined,
+    });
     return NextResponse.json({ error: "Internal server error" }, { status: 500 });
   }
 }
