@@ -9,7 +9,7 @@
     "build": "turbo build",
     "lint": "turbo lint",
     "typecheck": "turbo typecheck",
-    "db:generate": "cd packages/db && prisma generate",
+    "db:generate": "pnpm --filter ./packages/db exec prisma generate",
     "db:push": "cd packages/db && prisma db push",
     "db:migrate": "cd packages/db && prisma migrate dev",
     "db:seed": "cd packages/db && tsx src/seed.ts",
