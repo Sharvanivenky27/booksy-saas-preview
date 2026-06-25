@@ -1,0 +1,7 @@
+[build]
+  base = "apps/web"
+  command = "cd ../.. && pnpm run db:generate && cd apps/web && next build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "20"
