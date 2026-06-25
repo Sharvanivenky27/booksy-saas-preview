@@ -1,6 +1,7 @@
 [build]
-  command = "pnpm run db:generate && pnpm --filter @booksy/web exec next build"
-  publish = "apps/web/.next"
+  base = "apps/web"
+  command = "pnpm -C ../.. run db:generate && next build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "20"
