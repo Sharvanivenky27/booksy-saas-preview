@@ -6,22 +6,17 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@booksy/db"],
-  // Required for pnpm monorepo: let Next.js trace files up to the repo root
+  // Monorepo root so Next.js file-tracing can follow pnpm symlinks up to the
+  // virtual store and include the Prisma query engine binary in Lambda bundles.
   outputFileTracingRoot: path.join(__dirname, "../../"),
+  // Keep Prisma outside the webpack bundle so the file tracer resolves it as
+  // an external require() and includes the .node engine binary in the trace.
+  serverExternalPackages: ["@prisma/client", ".prisma/client"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
-  },
-  experimental: {
-    // Force-include the Prisma query engine binary that Netlify's Lambda needs.
-    // pnpm stores it in the virtual store, which Next.js file-tracing misses.
-    outputFileTracingIncludes: {
-      "/**": [
-        "../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/**",
-      ],
-    },
   },
 };
 
