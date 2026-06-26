@@ -15,6 +15,12 @@ interface LocationsClientProps {
   locations: LocationRecord[];
 }
 
+function formatAddress(location: LocationRecord) {
+  return [location.address, location.city, location.province, location.postalCode]
+    .filter(Boolean)
+    .join(", ") || "—";
+}
+
 export function LocationsClient({ locations }: LocationsClientProps) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -71,7 +77,7 @@ export function LocationsClient({ locations }: LocationsClientProps) {
   }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-4 sm:p-6 space-y-4">
       <div className="flex items-center justify-between gap-4">
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -90,35 +96,47 @@ export function LocationsClient({ locations }: LocationsClientProps) {
 
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[800px] text-sm">
-            <thead className="bg-gray-50 text-gray-500 text-left">
-              <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Address</th>
-                <th className="px-4 py-3 font-medium">City</th>
-                <th className="px-4 py-3 font-medium">Province</th>
-                <th className="px-4 py-3 font-medium">Postal Code</th>
-                <th className="px-4 py-3 font-medium">Phone</th>
-                <th className="px-4 py-3 font-medium text-right">Actions</th>
+          <table className="w-full min-w-[520px] text-sm">
+            <thead>
+              <tr className="border-b border-gray-100 bg-gray-50/80">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Location</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Address</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Contact</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-100">
+            <tbody className="divide-y divide-gray-50">
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={7} className="px-4 py-8 text-center text-gray-400">
+                  <td colSpan={4} className="px-4 py-10 text-center text-sm text-gray-400">
                     No locations match &quot;{query}&quot;.
                   </td>
                 </tr>
               )}
               {filtered.map((location) => (
-                <tr key={location.id}>
-                  <td className="px-4 py-3 text-gray-900">{location.name}</td>
-                  <td className="px-4 py-3 text-gray-700">{location.address ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-700">{location.city ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-700">{location.province ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-700">{location.postalCode ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-700">{location.phone ?? "—"}</td>
-                  <td className="px-4 py-3 text-right">
+                <tr key={location.id} className="hover:bg-gray-50/60 transition-colors">
+                  <td className="px-4 py-3.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="h-8 w-8 rounded-lg bg-amber-50 border border-amber-100 flex items-center justify-center flex-shrink-0">
+                        <MapPin className="h-4 w-4 text-amber-500" />
+                      </div>
+                      <span className="font-medium text-gray-900">{location.name}</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3.5 text-gray-500 max-w-[260px]">
+                    <span className="truncate block" title={formatAddress(location)}>
+                      {formatAddress(location)}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3.5">
+                    <div className="text-gray-500 text-sm">
+                      {location.phone ?? <span className="text-gray-300">—</span>}
+                    </div>
+                    {location.email && (
+                      <div className="text-gray-400 text-xs mt-0.5">{location.email}</div>
+                    )}
+                  </td>
+                  <td className="px-4 py-3.5 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <Button variant="ghost" size="sm" onClick={() => setEditTarget(location)}>
                         Edit

@@ -2,8 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Scissors, Search } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Clock, Plus, Scissors, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,10 +17,7 @@ interface ServicesClientProps {
 
 function formatPrice(price: number | string, currency: string) {
   const amount = typeof price === "string" ? parseFloat(price) : price;
-  return new Intl.NumberFormat("en-CA", {
-    style: "currency",
-    currency,
-  }).format(amount);
+  return new Intl.NumberFormat("en-CA", { style: "currency", currency }).format(amount);
 }
 
 export function ServicesClient({ services }: ServicesClientProps) {
@@ -79,7 +75,7 @@ export function ServicesClient({ services }: ServicesClientProps) {
   }
 
   return (
-    <div className="p-6 space-y-4">
+    <div className="p-4 sm:p-6 space-y-5">
       <div className="flex items-center justify-between gap-4">
         <div className="relative w-full max-w-sm">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
@@ -96,61 +92,61 @@ export function ServicesClient({ services }: ServicesClientProps) {
         </Button>
       </div>
 
-      <Card className="overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] text-sm">
-            <thead className="bg-gray-50 text-gray-500 text-left">
-              <tr>
-                <th className="px-4 py-3 font-medium">Name</th>
-                <th className="px-4 py-3 font-medium">Category</th>
-                <th className="px-4 py-3 font-medium">Price</th>
-                <th className="px-4 py-3 font-medium">Duration</th>
-                <th className="px-4 py-3 font-medium">Status</th>
-                <th className="px-4 py-3 font-medium text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                    No services match &quot;{query}&quot;.
-                  </td>
-                </tr>
-              )}
-              {filtered.map((service) => (
-                <tr key={service.id}>
-                  <td className="px-4 py-3 text-gray-900">{service.name}</td>
-                  <td className="px-4 py-3 text-gray-700">{service.category ?? "—"}</td>
-                  <td className="px-4 py-3 text-gray-700">
-                    {formatPrice(service.price, service.currency)}
-                  </td>
-                  <td className="px-4 py-3 text-gray-700">{service.duration} min</td>
-                  <td className="px-4 py-3">
-                    <Badge variant={service.isActive ? "success" : "secondary"}>
-                      {service.isActive ? "Active" : "Inactive"}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => setEditTarget(service)}>
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:bg-red-50"
-                        onClick={() => setDeleteTarget(service)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+      {filtered.length === 0 ? (
+        <div className="py-10 text-center text-sm text-gray-400">
+          No services match &quot;{query}&quot;.
         </div>
-      </Card>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map((service) => (
+            <div
+              key={service.id}
+              className="bg-white rounded-xl border border-gray-100 p-5 hover:border-brand-100 hover:shadow-md transition-all"
+            >
+              {/* Top: name + status badge */}
+              <div className="flex items-start justify-between gap-2 mb-3">
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-gray-900 truncate">{service.name}</h3>
+                  {service.category && (
+                    <span className="inline-block mt-1.5 text-xs px-2 py-0.5 bg-gray-100 rounded-full text-gray-500">
+                      {service.category}
+                    </span>
+                  )}
+                </div>
+                <Badge variant={service.isActive ? "success" : "secondary"} className="flex-shrink-0 mt-0.5">
+                  {service.isActive ? "Active" : "Inactive"}
+                </Badge>
+              </div>
+
+              {/* Bottom: price + duration + actions */}
+              <div className="flex items-end justify-between pt-3 mt-3 border-t border-gray-50">
+                <div>
+                  <p className="text-2xl font-bold text-gray-900 tracking-tight">
+                    {formatPrice(service.price, service.currency)}
+                  </p>
+                  <p className="flex items-center gap-1 text-xs text-gray-400 mt-1">
+                    <Clock className="h-3 w-3" />
+                    {service.duration} min
+                  </p>
+                </div>
+                <div className="flex gap-1">
+                  <Button variant="ghost" size="sm" onClick={() => setEditTarget(service)}>
+                    Edit
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-600 hover:bg-red-50"
+                    onClick={() => setDeleteTarget(service)}
+                  >
+                    Delete
+                  </Button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
       <ServiceFormDialog open={createOpen} onOpenChange={setCreateOpen} />
       <ServiceFormDialog
