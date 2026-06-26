@@ -16,13 +16,10 @@ const nextConfig = {
     // Required for pnpm monorepo: raises the file-tracing root so nft can
     // follow symlinks from packages/db → pnpm virtual store at repo root.
     outputFileTracingRoot: path.join(__dirname, "../../"),
-    // Explicitly include the Prisma query engine binary for the Lambda runtime.
-    // Without this, nft misses the dynamically-loaded .node file.
+    // Explicitly include the Prisma query engine binary for every route.
+    // nft misses the dynamically-loaded .node file; "/**" matches all routes.
     outputFileTracingIncludes: {
-      "/api/auth/login": [
-        "../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/**",
-      ],
-      "/api/auth/me": [
+      "/**": [
         "../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/**",
       ],
     },
