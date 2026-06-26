@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+
+export const metadata: Metadata = { title: "Services" };
 import { prisma } from "@/lib/db";
 import { TopBar } from "@/components/layout/TopBar";
 import { ServicesClient } from "./ServicesClient";

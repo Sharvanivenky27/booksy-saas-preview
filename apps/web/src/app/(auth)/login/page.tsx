@@ -59,6 +59,7 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
+                autoComplete="email"
                 placeholder="you@example.com"
                 error={errors.email?.message}
                 {...register("email")}
@@ -69,6 +70,7 @@ export default function LoginPage() {
               <Input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="••••••••"
                 error={errors.password?.message}
                 {...register("password")}
@@ -76,7 +78,7 @@ export default function LoginPage() {
             </div>
 
             {serverError && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {serverError}
               </p>
             )}

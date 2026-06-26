@@ -69,6 +69,14 @@ const STATUS_OPTIONS: AppointmentStatus[] = [
   "NO_SHOW",
 ];
 
+const STATUS_LABELS: Record<AppointmentStatus, string> = {
+  PENDING: "Pending",
+  CONFIRMED: "Confirmed",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+  NO_SHOW: "No Show",
+};
+
 const STATUS_VARIANT: Record<AppointmentStatus, "warning" | "success" | "secondary" | "destructive"> = {
   PENDING: "warning",
   CONFIRMED: "success",
@@ -112,7 +120,7 @@ export function BookingsClient({
         return;
       }
       setRows((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-      toast({ variant: "success", title: `Booking marked as ${status}` });
+      toast({ variant: "success", title: `Booking marked as ${STATUS_LABELS[status]}` });
     } catch {
       toast({
         variant: "destructive",
@@ -186,7 +194,7 @@ export function BookingsClient({
                     {format(new Date(appt.startTime), "MMM d, yyyy h:mm a")}
                   </td>
                   <td className="px-4 py-3">
-                    <Badge variant={STATUS_VARIANT[appt.status]}>{appt.status}</Badge>
+                    <Badge variant={STATUS_VARIANT[appt.status]}>{STATUS_LABELS[appt.status]}</Badge>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -201,7 +209,7 @@ export function BookingsClient({
                         <SelectContent>
                           {STATUS_OPTIONS.map((status) => (
                             <SelectItem key={status} value={status}>
-                              {status}
+                              {STATUS_LABELS[status]}
                             </SelectItem>
                           ))}
                         </SelectContent>

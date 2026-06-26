@@ -33,7 +33,7 @@ export function TopBar({ title, subtitle, actions }: TopBarProps) {
           disabled
           aria-label="Notifications (coming soon)"
           title="Notifications (coming soon)"
-          className="relative p-2 text-gray-300 rounded-lg cursor-not-allowed disabled:opacity-100"
+          className="relative p-2 text-gray-300 rounded-lg cursor-not-allowed opacity-40"
         >
           <Bell className="h-4 w-4" />
         </button>

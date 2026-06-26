@@ -43,9 +43,20 @@ const PLACEHOLDER_ITEMS = [
 interface SidebarProps {
   businessName?: string;
   userName?: string;
+  userRole?: string;
 }
 
-export function Sidebar({ businessName = "My Business", userName = "Owner" }: SidebarProps) {
+function formatRole(role?: string) {
+  if (!role) return "Member";
+  const map: Record<string, string> = {
+    OWNER: "Owner",
+    ADMIN: "Admin",
+    STAFF: "Staff",
+  };
+  return map[role] ?? role.charAt(0) + role.slice(1).toLowerCase();
+}
+
+export function Sidebar({ businessName = "My Business", userName = "User", userRole }: SidebarProps) {
   const pathname = usePathname();
   const { mobileOpen, closeMobile } = useSidebar();
   const asideRef = useRef<HTMLElement>(null);
@@ -193,7 +204,7 @@ export function Sidebar({ businessName = "My Business", userName = "Owner" }: Si
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-medium text-white truncate">{userName}</p>
-          <p className="text-xs text-brand-400">Owner</p>
+          <p className="text-xs text-brand-400">{formatRole(userRole)}</p>
         </div>
         <button
           onClick={handleLogout}

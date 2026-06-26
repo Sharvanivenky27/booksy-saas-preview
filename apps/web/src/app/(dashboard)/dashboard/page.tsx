@@ -1,5 +1,8 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+
+export const metadata: Metadata = { title: "Dashboard" };
 import { prisma } from "@/lib/db";
 import type { Prisma } from "@booksy/db";
 import { TopBar } from "@/components/layout/TopBar";
@@ -10,9 +13,9 @@ import Link from "next/link";
 import {
   CalendarDays,
   Users,
+  Users2,
   Scissors,
   Clock,
-  TrendingUp,
   CheckCircle2,
   Circle,
   ArrowRight,
@@ -27,6 +30,14 @@ type UpcomingAppointment = Prisma.AppointmentGetPayload<{
   };
 }>;
 
+const STATUS_LABELS: Record<string, string> = {
+  PENDING: "Pending",
+  CONFIRMED: "Confirmed",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+  NO_SHOW: "No Show",
+};
+
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, "default" | "success" | "warning" | "destructive" | "secondary"> = {
     PENDING: "warning",
@@ -35,7 +46,11 @@ function StatusBadge({ status }: { status: string }) {
     CANCELLED: "destructive",
     NO_SHOW: "secondary",
   };
-  return <Badge variant={map[status] ?? "secondary"}>{status}</Badge>;
+  return (
+    <Badge variant={map[status] ?? "secondary"}>
+      {STATUS_LABELS[status] ?? status}
+    </Badge>
+  );
 }
 
 export default async function DashboardPage() {
@@ -107,7 +122,7 @@ export default async function DashboardPage() {
     {
       label: "Staff Members",
       value: totalStaff,
-      icon: TrendingUp,
+      icon: Users2,
       color: "text-amber-600",
       bg: "bg-amber-50",
     },

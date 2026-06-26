@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -114,9 +113,11 @@ export function CustomersClient({ customers }: CustomersClientProps) {
                   <td className="px-4 py-3 text-gray-900">{customer.name}</td>
                   <td className="px-4 py-3 text-gray-700">{customer.email ?? "—"}</td>
                   <td className="px-4 py-3 text-gray-700">{customer.phone ?? "—"}</td>
-                  <td className="px-4 py-3">
+                  <td className="px-4 py-3 max-w-[200px]">
                     {customer.notes ? (
-                      <Badge variant="secondary">{customer.notes}</Badge>
+                      <span className="text-gray-600 text-sm truncate block" title={customer.notes}>
+                        {customer.notes}
+                      </span>
                     ) : (
                       <span className="text-gray-400">—</span>
                     )}

@@ -77,6 +77,7 @@ export default function RegisterPage() {
               <Label htmlFor="name">Your Name</Label>
               <Input
                 id="name"
+                autoComplete="name"
                 placeholder="Jane Smith"
                 error={errors.name?.message}
                 {...register("name")}
@@ -87,6 +88,7 @@ export default function RegisterPage() {
               <Input
                 id="email"
                 type="email"
+                autoComplete="email"
                 placeholder="you@example.com"
                 error={errors.email?.message}
                 {...register("email")}
@@ -97,6 +99,7 @@ export default function RegisterPage() {
               <Input
                 id="password"
                 type="password"
+                autoComplete="new-password"
                 placeholder="At least 8 characters"
                 error={errors.password?.message}
                 {...register("password")}
@@ -106,13 +109,14 @@ export default function RegisterPage() {
               <Label htmlFor="businessName">Business Name</Label>
               <Input
                 id="businessName"
+                autoComplete="organization"
                 placeholder="My Dental Clinic"
                 error={errors.businessName?.message}
                 {...register("businessName")}
               />
             </div>
             <div className="space-y-1.5">
-              <Label>Business Type</Label>
+              <Label htmlFor="businessType-trigger">Business Type</Label>
               <Select
                 value={businessType}
                 onValueChange={(val) => {
@@ -123,7 +127,7 @@ export default function RegisterPage() {
                   );
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger id="businessType-trigger">
                   <SelectValue placeholder="Select industry" />
                 </SelectTrigger>
                 <SelectContent>
@@ -142,7 +146,7 @@ export default function RegisterPage() {
             </div>
 
             {serverError && (
-              <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+              <p role="alert" className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
                 {serverError}
               </p>
             )}

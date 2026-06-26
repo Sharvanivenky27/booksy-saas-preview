@@ -236,7 +236,13 @@ export function BookingFormDialog({
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="booking-date">Date</Label>
-          <Input id="booking-date" type="date" error={errors.date?.message} {...register("date")} />
+          <Input
+            id="booking-date"
+            type="date"
+            min={new Date().toLocaleDateString("en-CA")}
+            error={errors.date?.message}
+            {...register("date")}
+          />
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="booking-time">Time</Label>
