@@ -6,17 +6,29 @@ const __dirname = fileURLToPath(new URL(".", import.meta.url));
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ["@booksy/db"],
-  // Monorepo root so Next.js file-tracing can follow pnpm symlinks up to the
-  // virtual store and include the Prisma query engine binary in Lambda bundles.
-  outputFileTracingRoot: path.join(__dirname, "../../"),
-  // Keep Prisma outside the webpack bundle so the file tracer resolves it as
-  // an external require() and includes the .node engine binary in the trace.
-  serverExternalPackages: ["@prisma/client", ".prisma/client"],
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "avatars.githubusercontent.com" },
       { protocol: "https", hostname: "lh3.googleusercontent.com" },
     ],
+  },
+  experimental: {
+    // Required for pnpm monorepo: raises the file-tracing root so nft can
+    // follow symlinks from packages/db → pnpm virtual store at repo root.
+    outputFileTracingRoot: path.join(__dirname, "../../"),
+    // Explicitly include the Prisma query engine binary for the Lambda runtime.
+    // Without this, nft misses the dynamically-loaded .node file.
+    outputFileTracingIncludes: {
+      "/api/auth/login": [
+        "../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/**",
+      ],
+      "/api/auth/me": [
+        "../../node_modules/.pnpm/@prisma+client@*/node_modules/.prisma/client/**",
+      ],
+    },
+    // Keep Prisma outside the webpack bundle so it is resolved at runtime
+    // and the file tracer can include the native .node engine binary.
+    serverComponentsExternalPackages: ["@prisma/client", ".prisma/client"],
   },
 };
 
