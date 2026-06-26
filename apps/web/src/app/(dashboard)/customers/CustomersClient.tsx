@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search, Users } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -29,8 +30,12 @@ function CustomerAvatar({ name }: { name: string }) {
   );
 }
 
+interface CustomerRow extends CustomerRecord {
+  _count?: { appointments: number };
+}
+
 interface CustomersClientProps {
-  customers: CustomerRecord[];
+  customers: CustomerRow[];
 }
 
 export function CustomersClient({ customers }: CustomersClientProps) {
@@ -106,6 +111,13 @@ export function CustomersClient({ customers }: CustomersClientProps) {
         </Button>
       </div>
 
+      {query && (
+        <p className="text-xs text-gray-400">
+          Showing <span className="font-medium text-gray-600">{filtered.length}</span> of{" "}
+          <span className="font-medium text-gray-600">{customers.length}</span> customers
+        </p>
+      )}
+
       <Card className="overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full min-w-[560px] text-sm">
@@ -114,6 +126,7 @@ export function CustomersClient({ customers }: CustomersClientProps) {
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Customer</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Email</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Phone</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Bookings</th>
                 <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Notes</th>
                 <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">Actions</th>
               </tr>
@@ -121,47 +134,59 @@ export function CustomersClient({ customers }: CustomersClientProps) {
             <tbody className="divide-y divide-gray-50">
               {filtered.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-4 py-10 text-center text-sm text-gray-400">
+                  <td colSpan={6} className="px-4 py-10 text-center text-sm text-gray-400">
                     No customers match &quot;{query}&quot;.
                   </td>
                 </tr>
               )}
-              {filtered.map((customer) => (
-                <tr key={customer.id} className="hover:bg-gray-50/60 transition-colors">
-                  <td className="px-4 py-3.5">
-                    <div className="flex items-center gap-2.5">
-                      <CustomerAvatar name={customer.name} />
-                      <span className="font-medium text-gray-900">{customer.name}</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3.5 text-gray-500">{customer.email ?? "—"}</td>
-                  <td className="px-4 py-3.5 text-gray-500">{customer.phone ?? "—"}</td>
-                  <td className="px-4 py-3.5 max-w-[200px]">
-                    {customer.notes ? (
-                      <span className="text-gray-500 text-sm truncate block" title={customer.notes}>
-                        {customer.notes}
-                      </span>
-                    ) : (
-                      <span className="text-gray-300">—</span>
-                    )}
-                  </td>
-                  <td className="px-4 py-3.5 text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => setEditTarget(customer)}>
-                        Edit
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-600 hover:bg-red-50"
-                        onClick={() => setDeleteTarget(customer)}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+              {filtered.map((customer) => {
+                const bookingCount = customer._count?.appointments ?? 0;
+                return (
+                  <tr key={customer.id} className="hover:bg-gray-50/60 transition-colors">
+                    <td className="px-4 py-3.5">
+                      <div className="flex items-center gap-2.5">
+                        <CustomerAvatar name={customer.name} />
+                        <span className="font-medium text-gray-900">{customer.name}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3.5 text-gray-500">{customer.email ?? "—"}</td>
+                    <td className="px-4 py-3.5 text-gray-500">{customer.phone ?? "—"}</td>
+                    <td className="px-4 py-3.5">
+                      {bookingCount > 0 ? (
+                        <Badge variant="secondary" className="font-semibold">
+                          {bookingCount}
+                        </Badge>
+                      ) : (
+                        <span className="text-xs text-gray-300">None</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5 max-w-[200px]">
+                      {customer.notes ? (
+                        <span className="text-gray-500 text-sm truncate block" title={customer.notes}>
+                          {customer.notes}
+                        </span>
+                      ) : (
+                        <span className="text-gray-300">—</span>
+                      )}
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <div className="flex items-center justify-end gap-1">
+                        <Button variant="ghost" size="sm" onClick={() => setEditTarget(customer)}>
+                          Edit
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="text-red-600 hover:bg-red-50"
+                          onClick={() => setDeleteTarget(customer)}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -196,118 +196,151 @@ export function BookingFormDialog({
       isSubmitting={isSubmitting}
       submitLabel="Create booking"
     >
-      <div className="space-y-1.5">
-        <Label htmlFor="booking-customer">Customer</Label>
-        <Select value={customerId || undefined} onValueChange={(val) => setValue("customerId", val)}>
-          <SelectTrigger id="booking-customer">
-            <SelectValue placeholder="Select a customer" />
-          </SelectTrigger>
-          <SelectContent>
-            {customers.map((c) => (
-              <SelectItem key={c.id} value={c.id}>
-                {c.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.customerId && <p className="text-xs text-red-600">{errors.customerId.message}</p>}
-      </div>
-
-      <div className="space-y-1.5">
-        <Label htmlFor="booking-service">Service</Label>
-        <Select value={serviceId || undefined} onValueChange={(val) => setValue("serviceId", val)}>
-          <SelectTrigger id="booking-service">
-            <SelectValue placeholder="Select a service" />
-          </SelectTrigger>
-          <SelectContent>
-            {services.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.name} · {s.duration} min
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {errors.serviceId && <p className="text-xs text-red-600">{errors.serviceId.message}</p>}
-        {selectedService && (
-          <p className="text-xs text-gray-500">Duration: {selectedService.duration} minutes</p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-        <div className="space-y-1.5">
-          <Label htmlFor="booking-date">Date</Label>
-          <Input
-            id="booking-date"
-            type="date"
-            min={new Date().toLocaleDateString("en-CA")}
-            error={errors.date?.message}
-            {...register("date")}
-          />
+      {/* Section 1: Who */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Customer &amp; Service</span>
+          <div className="flex-1 h-px bg-gray-100" />
         </div>
-        <div className="space-y-1.5">
-          <Label htmlFor="booking-time">Time</Label>
-          <Input id="booking-time" type="time" error={errors.time?.message} {...register("time")} />
-        </div>
-      </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="booking-staff">Staff</Label>
-        {staff.length > 0 ? (
-          <Select value={staffId || undefined} onValueChange={(val) => setValue("staffId", val)}>
-            <SelectTrigger id="booking-staff">
-              <SelectValue placeholder="Unassigned" />
+        <div className="space-y-1.5">
+          <Label htmlFor="booking-customer">Customer</Label>
+          <Select value={customerId || undefined} onValueChange={(val) => setValue("customerId", val)}>
+            <SelectTrigger id="booking-customer">
+              <SelectValue placeholder="Select a customer" />
             </SelectTrigger>
             <SelectContent>
-              {staff.map((s) => (
+              {customers.map((c) => (
+                <SelectItem key={c.id} value={c.id}>
+                  {c.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          {errors.customerId && <p className="text-xs text-red-600">{errors.customerId.message}</p>}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="booking-service">Service</Label>
+          <Select value={serviceId || undefined} onValueChange={(val) => setValue("serviceId", val)}>
+            <SelectTrigger id="booking-service">
+              <SelectValue placeholder="Select a service" />
+            </SelectTrigger>
+            <SelectContent>
+              {services.map((s) => (
                 <SelectItem key={s.id} value={s.id}>
-                  {s.name}
+                  {s.name} · {s.duration} min
                 </SelectItem>
               ))}
             </SelectContent>
           </Select>
-        ) : (
-          <p className="text-xs text-gray-500">
-            No staff yet — this booking will be unassigned.{" "}
-            <Link href="/staff" className="text-brand-600 hover:underline">
-              Add staff
-            </Link>
-          </p>
-        )}
+          {errors.serviceId && <p className="text-xs text-red-600">{errors.serviceId.message}</p>}
+          {selectedService && (
+            <p className="text-xs text-gray-400">Duration: {selectedService.duration} minutes</p>
+          )}
+        </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="booking-location">Location</Label>
-        {locations.length > 0 ? (
-          <Select value={locationId || undefined} onValueChange={(val) => setValue("locationId", val)}>
-            <SelectTrigger id="booking-location">
-              <SelectValue placeholder="No location" />
-            </SelectTrigger>
-            <SelectContent>
-              {locations.map((l) => (
-                <SelectItem key={l.id} value={l.id}>
-                  {l.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        ) : (
-          <p className="text-xs text-gray-500">
-            No locations yet.{" "}
-            <Link href="/locations" className="text-brand-600 hover:underline">
-              Add a location
-            </Link>
-          </p>
-        )}
+      {/* Section 2: When */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Date &amp; Time</span>
+          <div className="flex-1 h-px bg-gray-100" />
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="space-y-1.5">
+            <Label htmlFor="booking-date">Date</Label>
+            <Input
+              id="booking-date"
+              type="date"
+              min={new Date().toLocaleDateString("en-CA")}
+              error={errors.date?.message}
+              {...register("date")}
+            />
+          </div>
+          <div className="space-y-1.5">
+            <Label htmlFor="booking-time">Time</Label>
+            <Input id="booking-time" type="time" error={errors.time?.message} {...register("time")} />
+          </div>
+        </div>
       </div>
 
-      <div className="space-y-1.5">
-        <Label htmlFor="booking-notes">Notes</Label>
-        <Textarea id="booking-notes" error={errors.notes?.message} {...register("notes")} />
+      {/* Section 3: Assignment */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Staff &amp; Location</span>
+          <div className="flex-1 h-px bg-gray-100" />
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="booking-staff">Staff <span className="text-gray-400 font-normal">(optional)</span></Label>
+          {staff.length > 0 ? (
+            <Select value={staffId || undefined} onValueChange={(val) => setValue("staffId", val)}>
+              <SelectTrigger id="booking-staff">
+                <SelectValue placeholder="Unassigned" />
+              </SelectTrigger>
+              <SelectContent>
+                {staff.map((s) => (
+                  <SelectItem key={s.id} value={s.id}>
+                    {s.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
+              No staff yet.{" "}
+              <Link href="/staff" className="text-brand-600 hover:underline font-medium">
+                Add staff →
+              </Link>
+            </p>
+          )}
+        </div>
+
+        <div className="space-y-1.5">
+          <Label htmlFor="booking-location">Location <span className="text-gray-400 font-normal">(optional)</span></Label>
+          {locations.length > 0 ? (
+            <Select value={locationId || undefined} onValueChange={(val) => setValue("locationId", val)}>
+              <SelectTrigger id="booking-location">
+                <SelectValue placeholder="No location" />
+              </SelectTrigger>
+              <SelectContent>
+                {locations.map((l) => (
+                  <SelectItem key={l.id} value={l.id}>
+                    {l.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          ) : (
+            <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
+              No locations yet.{" "}
+              <Link href="/locations" className="text-brand-600 hover:underline font-medium">
+                Add a location →
+              </Link>
+            </p>
+          )}
+        </div>
       </div>
 
-      <p className="text-xs text-gray-500">
-        New bookings are created as <span className="font-medium text-gray-700">Confirmed</span>.
-        You can change the status anytime from the table.
+      {/* Section 4: Notes */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Notes</span>
+          <div className="flex-1 h-px bg-gray-100" />
+        </div>
+        <Textarea
+          id="booking-notes"
+          placeholder="Any special instructions or notes for this appointment..."
+          error={errors.notes?.message}
+          {...register("notes")}
+        />
+      </div>
+
+      <p className="text-xs text-gray-400 bg-gray-50 rounded-lg px-3 py-2">
+        New bookings are created as <span className="font-semibold text-gray-600">Confirmed</span>.
+        You can update the status from the bookings table.
       </p>
     </EntityFormDialog>
   );

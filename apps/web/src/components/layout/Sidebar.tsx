@@ -150,36 +150,44 @@ export function Sidebar({ businessName = "My Business", userName = "User", userR
         </div>
 
         {/* Nav */}
-        <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
-          {NAV_ITEMS.map((item) => {
-            const active =
-              item.href === "/dashboard"
-                ? pathname === "/dashboard"
-                : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={closeMobile}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
-                  active
-                    ? "bg-brand-700 text-white"
-                    : "text-brand-300 hover:bg-white/10 hover:text-white"
-                )}
-              >
-                <item.icon className="h-4 w-4 flex-shrink-0" />
-                {item.label}
-                {active && <ChevronRight className="h-3 w-3 ml-auto opacity-60" />}
-              </Link>
-            );
-          })}
+        <nav className="flex-1 px-2 py-3 overflow-y-auto">
+          {/* Section label */}
+          <p className="text-[10px] uppercase tracking-widest text-brand-600 font-semibold px-3 mb-1.5">
+            Main
+          </p>
+          <div className="space-y-0.5">
+            {NAV_ITEMS.map((item) => {
+              const active =
+                item.href === "/dashboard"
+                  ? pathname === "/dashboard"
+                  : pathname.startsWith(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={closeMobile}
+                  aria-current={active ? "page" : undefined}
+                  className={cn(
+                    "relative flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm font-medium transition-colors",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
+                    active
+                      ? "bg-white/10 text-white"
+                      : "text-brand-300 hover:bg-white/10 hover:text-white"
+                  )}
+                >
+                  {active && (
+                    <span className="absolute left-0 top-1.5 bottom-1.5 w-[3px] rounded-full bg-brand-300" />
+                  )}
+                  <item.icon className="h-4 w-4 flex-shrink-0" />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </div>
 
         {/* Placeholders */}
-        <div className="pt-4 pb-1 px-3">
-          <p className="text-[10px] uppercase tracking-widest text-brand-500 font-semibold">
+        <div className="pt-5 pb-1.5 px-3">
+          <p className="text-[10px] uppercase tracking-widest text-brand-600 font-semibold">
             Coming Soon
           </p>
         </div>

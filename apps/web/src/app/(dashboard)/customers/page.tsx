@@ -20,14 +20,15 @@ export default async function CustomersPage() {
       phone: true,
       dateOfBirth: true,
       notes: true,
+      _count: { select: { appointments: true } },
     },
     orderBy: { name: "asc" },
   });
 
   return (
     <>
-      <TopBar title="Customers" subtitle="Manage your customer list" />
-      <CustomersClient customers={customers} />
+      <TopBar title="Customers" subtitle={`${customers.length} customer${customers.length !== 1 ? "s" : ""}`} />
+      <CustomersClient customers={JSON.parse(JSON.stringify(customers))} />
     </>
   );
 }
