@@ -15,7 +15,6 @@ import {
   Users,
   Users2,
   Scissors,
-  Clock,
   CheckCircle2,
   Circle,
   ArrowRight,
@@ -50,6 +49,25 @@ function StatusBadge({ status }: { status: string }) {
     <Badge variant={map[status] ?? "secondary"}>
       {STATUS_LABELS[status] ?? status}
     </Badge>
+  );
+}
+
+function CustomerAvatar({ name }: { name: string }) {
+  const colors = [
+    "bg-brand-100 text-brand-700",
+    "bg-emerald-100 text-emerald-700",
+    "bg-purple-100 text-purple-700",
+    "bg-amber-100 text-amber-700",
+    "bg-rose-100 text-rose-700",
+    "bg-sky-100 text-sky-700",
+  ];
+  const colorIndex = name.charCodeAt(0) % colors.length;
+  return (
+    <div
+      className={`h-9 w-9 rounded-full ${colors[colorIndex]} flex items-center justify-center text-sm font-semibold flex-shrink-0`}
+    >
+      {name.charAt(0).toUpperCase()}
+    </div>
   );
 }
 
@@ -104,6 +122,7 @@ export default async function DashboardPage() {
       icon: CalendarDays,
       color: "text-brand-600",
       bg: "bg-brand-50",
+      border: "border-t-brand-500",
     },
     {
       label: "Total Customers",
@@ -111,6 +130,7 @@ export default async function DashboardPage() {
       icon: Users,
       color: "text-emerald-600",
       bg: "bg-emerald-50",
+      border: "border-t-emerald-500",
     },
     {
       label: "Active Services",
@@ -118,6 +138,7 @@ export default async function DashboardPage() {
       icon: Scissors,
       color: "text-purple-600",
       bg: "bg-purple-50",
+      border: "border-t-purple-500",
     },
     {
       label: "Staff Members",
@@ -125,6 +146,7 @@ export default async function DashboardPage() {
       icon: Users2,
       color: "text-amber-600",
       bg: "bg-amber-50",
+      border: "border-t-amber-500",
     },
   ];
 
@@ -179,15 +201,20 @@ export default async function DashboardPage() {
           </Card>
         )}
 
-        {/* Metrics */}
+        {/* Metric cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {metrics.map((m) => (
-            <Card key={m.label} className="transition-shadow hover:shadow-md">
+            <Card
+              key={m.label}
+              className={`border-t-4 ${m.border} transition-shadow hover:shadow-md`}
+            >
               <CardContent className="pt-5">
-                <div className="flex items-center justify-between">
+                <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-sm text-gray-500">{m.label}</p>
-                    <p className="text-3xl font-bold text-gray-900 mt-1 tracking-tight">
+                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
+                      {m.label}
+                    </p>
+                    <p className="text-4xl font-bold text-gray-900 tracking-tight">
                       {m.value}
                     </p>
                   </div>
@@ -202,8 +229,15 @@ export default async function DashboardPage() {
 
         {/* Upcoming appointments */}
         <Card>
-          <CardHeader>
+          <CardHeader className="flex-row items-center justify-between pb-3">
             <CardTitle>Upcoming Appointments</CardTitle>
+            <Link
+              href="/bookings"
+              className="text-sm text-brand-600 font-medium hover:underline flex items-center gap-1"
+            >
+              View all
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </CardHeader>
           <CardContent>
             {upcomingAppointments.length === 0 ? (
@@ -217,28 +251,17 @@ export default async function DashboardPage() {
                 {upcomingAppointments.map((appt: UpcomingAppointment) => (
                   <div
                     key={appt.id}
-                    className="flex flex-wrap items-center gap-3 sm:gap-4 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors"
+                    className="flex items-center gap-3 sm:gap-4 p-3.5 rounded-xl bg-gray-50/80 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-100"
                   >
-                    <div className="flex-shrink-0 text-center w-12">
-                      <p className="text-xs text-gray-400 uppercase">
-                        {format(appt.startTime, "MMM")}
-                      </p>
-                      <p className="text-lg font-bold text-gray-900 leading-none">
-                        {format(appt.startTime, "d")}
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0 hidden sm:block">
-                      <Clock className="h-4 w-4 text-gray-400" />
-                    </div>
+                    <CustomerAvatar name={appt.customer.name} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 truncate">
+                      <p className="text-sm font-semibold text-gray-900 truncate">
                         {appt.customer.name}
                       </p>
                       <p className="text-xs text-gray-500 truncate">
                         {appt.service.name} ·{" "}
-                        {format(appt.startTime, "h:mm a")}
-                        {appt.staff &&
-                          ` · ${appt.staff.user.name}`}
+                        {format(appt.startTime, "MMM d, h:mm a")}
+                        {appt.staff && ` · ${appt.staff.user.name}`}
                       </p>
                     </div>
                     <StatusBadge status={appt.status} />

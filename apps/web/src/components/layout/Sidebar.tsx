@@ -130,9 +130,14 @@ export function Sidebar({ businessName = "My Business", userName = "User", userR
       >
         {/* Logo */}
         <div className="px-4 py-5 border-b border-white/10 flex items-center justify-between">
-          <div className="min-w-0">
-            <span className="text-xl font-bold text-white">BookEase</span>
-            <p className="text-xs text-brand-300 mt-0.5 truncate">{businessName}</p>
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="w-8 h-8 rounded-lg bg-brand-600 flex items-center justify-center flex-shrink-0">
+              <CalendarDays className="h-4 w-4 text-white" />
+            </div>
+            <div className="min-w-0">
+              <span className="text-base font-bold text-white leading-none">BookEase</span>
+              <p className="text-xs text-brand-300 mt-0.5 truncate">{businessName}</p>
+            </div>
           </div>
           <button
             ref={closeButtonRef}
